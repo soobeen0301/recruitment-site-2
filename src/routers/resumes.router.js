@@ -81,7 +81,6 @@ router.get('/resumes', authMiddleware, async (req, res, next) => {
     const resumeList = resumes.map((resume) => ({
       resumeId: resume.resumeId,
       name: resume.user.userInfos.name,
-      userId: resume.userId,
       title: resume.title,
       introduction: resume.introduction,
       status: resume.status,
@@ -92,6 +91,42 @@ router.get('/resumes', authMiddleware, async (req, res, next) => {
     return res.status(200).json({
       status: 200,
       data: resumeList,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** 이력서 상세 조회 API **/
+router.get('/resumes/:resumeid', authMiddleware, async (req, res, next) => {
+  try {
+    const user = req.user;
+    const userId = user.id;
+    const resumeId = parseInt(req.params.resumeid);
+
+    // 유효성 검사
+    const resume = await prisma.resumes.findFirst({
+      where: { resumeId, userId },
+      include: { user: { include: { userInfos: true } } },
+    });
+
+    if (!resume) {
+      return res.status(404).json({ message: '이력서가 존재하지 않습니다.' });
+    }
+
+    const resumeDetail = {
+      resumeId: resume.resumeId,
+      name: resume.user.userInfos.name,
+      title: resume.title,
+      introduction: resume.introduction,
+      status: resume.status,
+      createdAt: resume.createdAt,
+      updatedAt: resume.updatedAt,
+    };
+
+    return res.status(200).json({
+      status: 200,
+      data: resumeDetail,
     });
   } catch (err) {
     next(err);
