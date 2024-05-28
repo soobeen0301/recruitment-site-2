@@ -4,6 +4,7 @@ import validator from 'validator';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../routers/index.js';
 import { JWT_SECRET } from '../constants/env.constant.js';
+import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
@@ -111,6 +112,42 @@ router.post('/sign-in', async (req, res, next) => {
     return res
       .status(200)
       .json({ status: 200, message: '로그인 성공했습니다.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/* 사용자 정보 조회 API */
+router.get('/users', authMiddleware, async (req, res, next) => {
+  try {
+    const { id } = req.user;
+
+    const user = await prisma.users.findFirst({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        userInfos: {
+          select: {
+            name: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    const userInto = {
+      id: user.id,
+      email: user.email,
+      name: user.userInfos.name,
+      role: user.userInfos.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+
+    return res.status(200).json({ status: 200, data: userInto });
   } catch (err) {
     next(err);
   }
