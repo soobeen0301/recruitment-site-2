@@ -1,7 +1,9 @@
 import express from 'express';
-import { prisma } from '../routers/index.js';
 import bcrypt from 'bcrypt';
 import validator from 'validator';
+import jwt from 'jsonwebtoken';
+import { prisma } from '../routers/index.js';
+import { JWT_SECRET } from '../constants/env.constant.js';
 
 const router = express.Router();
 
@@ -68,4 +70,49 @@ router.post('/sign-up', async (req, res, next) => {
   }
 });
 
+/* 사용자 로그인 API */
+router.post('/sign-in', async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // 유효성 검사
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: '이메일과 비밀번호를 입력해 주세요.' });
+    }
+
+    if (!validator.isEmail(email)) {
+      return res
+        .status(400)
+        .json({ message: '이메일 형식이 올바르지 않습니다.' });
+    }
+
+    const user = await prisma.users.findFirst({ where: { email } });
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res
+        .status(401)
+        .json({ message: '인증 정보가 유효하지 않습니다.' });
+    }
+
+    // AccessToken 생성
+    const token = jwt.sign(
+      {
+        userId: user.id,
+      },
+      JWT_SECRET,
+
+      { expiresIn: '12h' }
+    );
+
+    res.cookie('authorization', `Bearer ${token}`);
+
+    return res
+      .status(200)
+      .json({ status: 200, message: '로그인 성공했습니다.' });
+  } catch (err) {
+    next(err);
+  }
+});
 export default router;
