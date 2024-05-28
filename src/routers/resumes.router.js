@@ -55,4 +55,47 @@ router.post('/resumes', authMiddleware, async (req, res, next) => {
   }
 });
 
+/** 이력서 목록 조회 API **/
+router.get('/resumes', authMiddleware, async (req, res, next) => {
+  try {
+    const { id } = req.user;
+    const { sort } = req.query;
+
+    const resumes = await prisma.resumes.findMany({
+      where: { userId: id },
+      orderBy: { createdAt: sort?.toLowerCase() === 'asc' ? 'asc' : 'desc' },
+      include: {
+        user: {
+          include: {
+            userInfos: true,
+          },
+        },
+      },
+    });
+
+    // 유효성 검사
+    if (resumes.length === 0) {
+      return res.status(200).json({ data: [] });
+    }
+
+    const resumeList = resumes.map((resume) => ({
+      resumeId: resume.resumeId,
+      name: resume.user.userInfos.name,
+      userId: resume.userId,
+      title: resume.title,
+      introduction: resume.introduction,
+      status: resume.status,
+      createdAt: resume.createdAt,
+      updatedAt: resume.updatedAt,
+    }));
+
+    return res.status(200).json({
+      status: 200,
+      data: resumeList,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;
