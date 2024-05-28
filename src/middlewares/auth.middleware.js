@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { prisma } from '../utils/prisma/index.js';
+import { prisma } from '../routers/index.js';
 import { JWT_SECRET } from '../constants/env.constant.js';
 
 export default async function (req, res, next) {
