@@ -1,7 +1,4 @@
 import express from 'express';
-import bcrypt from 'bcrypt';
-import validator from 'validator';
-import jwt from 'jsonwebtoken';
 import { prisma } from '../routers/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { RESUME_STATUS } from '../constants/resume.constant.js';
@@ -45,7 +42,7 @@ router.post('/resumes', authMiddleware, async (req, res, next) => {
         userId: resume.userId,
         title: resume.title,
         introduction: resume.introduction,
-        status: RESUME_STATUS.APPLY,
+        status: resume.status,
         createdAt: resume.createdAt,
         updatedAt: resume.updatedAt,
       },
@@ -84,7 +81,7 @@ router.get('/resumes', authMiddleware, async (req, res, next) => {
       name: resume.user.userInfos.name,
       title: resume.title,
       introduction: resume.introduction,
-      status: RESUME_STATUS.APPLY,
+      status: resume.status,
       createdAt: resume.createdAt,
       updatedAt: resume.updatedAt,
     }));
@@ -121,7 +118,7 @@ router.get('/resumes/:resumeid', authMiddleware, async (req, res, next) => {
       name: resume.user.userInfos.name,
       title: resume.title,
       introduction: resume.introduction,
-      status: RESUME_STATUS.APPLY,
+      status: resume.status,
       createdAt: resume.createdAt,
       updatedAt: resume.updatedAt,
     };
