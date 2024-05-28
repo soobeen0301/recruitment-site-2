@@ -45,7 +45,7 @@ router.post('/resumes', authMiddleware, async (req, res, next) => {
         userId: resume.userId,
         title: resume.title,
         introduction: resume.introduction,
-        status: resume.status,
+        status: RESUME_STATUS.APPLY,
         createdAt: resume.createdAt,
         updatedAt: resume.updatedAt,
       },
@@ -83,7 +83,7 @@ router.get('/resumes', authMiddleware, async (req, res, next) => {
       name: resume.user.userInfos.name,
       title: resume.title,
       introduction: resume.introduction,
-      status: resume.status,
+      status: RESUME_STATUS.APPLY,
       createdAt: resume.createdAt,
       updatedAt: resume.updatedAt,
     }));
@@ -119,7 +119,7 @@ router.get('/resumes/:resumeid', authMiddleware, async (req, res, next) => {
       name: resume.user.userInfos.name,
       title: resume.title,
       introduction: resume.introduction,
-      status: resume.status,
+      status: RESUME_STATUS.APPLY,
       createdAt: resume.createdAt,
       updatedAt: resume.updatedAt,
     };
@@ -127,6 +127,41 @@ router.get('/resumes/:resumeid', authMiddleware, async (req, res, next) => {
     return res.status(200).json({
       status: 200,
       data: resumeDetail,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** 이력서 수정 API **/
+router.put('/resumes/:resumeid', authMiddleware, async (req, res, next) => {
+  try {
+    const user = req.user;
+    const userId = user.id;
+    const resumeId = parseInt(req.params.resumeid);
+    const { title, introduction } = req.body;
+
+    // 유효성 검사
+    if (!title || !introduction) {
+      return res.status(400).json({ message: '수정 할 정보를 입력해 주세요.' });
+    }
+
+    const resume = await prisma.resumes.findFirst({
+      where: { resumeId, userId },
+    });
+
+    if (!resume) {
+      return res.status(404).json({ message: '이력서가 존재하지 않습니다.' });
+    }
+
+    const resumeUpdate = await prisma.resumes.update({
+      where: { resumeId },
+      data: { title, introduction },
+    });
+
+    return res.status(200).json({
+      status: 200,
+      data: resumeUpdate,
     });
   } catch (err) {
     next(err);
