@@ -78,6 +78,7 @@ router.get('/resumes', authMiddleware, async (req, res, next) => {
       return res.status(200).json({ data: [] });
     }
 
+    //이력서 목록
     const resumeList = resumes.map((resume) => ({
       resumeId: resume.resumeId,
       name: resume.user.userInfos.name,
@@ -114,6 +115,7 @@ router.get('/resumes/:resumeid', authMiddleware, async (req, res, next) => {
       return res.status(404).json({ message: '이력서가 존재하지 않습니다.' });
     }
 
+    //이력서 상세 내용
     const resumeDetail = {
       resumeId: resume.resumeId,
       name: resume.user.userInfos.name,
@@ -154,6 +156,7 @@ router.put('/resumes/:resumeid', authMiddleware, async (req, res, next) => {
       return res.status(404).json({ message: '이력서가 존재하지 않습니다.' });
     }
 
+    //이력서 수정
     const resumeUpdate = await prisma.resumes.update({
       where: { resumeId },
       data: { title, introduction },
@@ -162,6 +165,37 @@ router.put('/resumes/:resumeid', authMiddleware, async (req, res, next) => {
     return res.status(200).json({
       status: 200,
       data: resumeUpdate,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** 이력서 삭제 API **/
+router.delete('/resumes/:resumeid', authMiddleware, async (req, res, next) => {
+  try {
+    const user = req.user;
+    const userId = user.id;
+    const resumeId = parseInt(req.params.resumeid);
+
+    // 유효성 검사
+    const resume = await prisma.resumes.findFirst({
+      where: { resumeId, userId },
+    });
+
+    if (!resume) {
+      return res.status(404).json({ message: '이력서가 존재하지 않습니다.' });
+    }
+
+    // 이력서 삭제
+    await prisma.resumes.delete({
+      where: { resumeId },
+    });
+
+    return res.status(200).json({
+      status: 200,
+      message: '이력서가 삭제되었습니다.',
+      data: { resumeId: resumeId },
     });
   } catch (err) {
     next(err);
