@@ -4,6 +4,7 @@ import validator from 'validator';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../routers/index.js';
 import { JWT_SECRET } from '../constants/env.constant.js';
+import { USERS_STATUS } from '../constants/user.constant.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
@@ -44,12 +45,11 @@ router.post('/sign-up', async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Users 테이블에 사용자 추가
-    const role = 'APPLICANT';
     const user = await prisma.users.create({
       data: {
         email,
         password: hashedPassword,
-        userInfos: { create: { name, role } }, // 이름 추가
+        userInfos: { create: { name, role: USERS_STATUS.APPLICANT } }, // 이름 추가
       },
       include: { userInfos: true },
     });
