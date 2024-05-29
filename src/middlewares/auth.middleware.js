@@ -8,11 +8,14 @@ export default async function (req, res, next) {
     if (!authorization) throw new Error('인증 정보가 없습니다.');
 
     const [tokenType, token] = authorization.split(' ');
+    console.log('Received token type:', tokenType);
+    console.log('Received token:', token);
 
     if (tokenType !== 'Bearer')
       throw new Error('지원하지 않는 인증 방식입니다.');
 
     const decodedToken = jwt.verify(token, JWT_SECRET);
+    console.log('Decoded token:', decodedToken);
     const userId = decodedToken.userId;
 
     const user = await prisma.users.findFirst({
@@ -27,9 +30,9 @@ export default async function (req, res, next) {
 
     // req.user에 user 정보 저장
     req.user = user;
-
     next();
   } catch (error) {
+    console.error('Authentication error:', error);
     switch (error.name) {
       case 'TokenExpiredError':
         return res

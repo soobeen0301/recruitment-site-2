@@ -49,7 +49,7 @@ router.post('/sign-up', async (req, res, next) => {
       data: {
         email,
         password: hashedPassword,
-        userInfos: { create: { name, role: USERS_STATUS.APPLICANT } }, // 이름 추가
+        userInfos: { create: { name, role: USERS_STATUS.APPLICANT } },
       },
       include: { userInfos: true },
     });
