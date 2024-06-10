@@ -3,6 +3,7 @@ import { prisma } from '../utils/prisma.util.js';
 import { HTTP_STATUS } from '../constants/http-status.constant.js';
 import { MESSAGES } from '../constants/messages.constant.js';
 import { createResumeValidator } from '../middlewares/validators/create-resume-validator.middleware.js';
+import { updatedResumeValidator } from '../middlewares/validators/updated-resume-validator.middleware.js';
 
 const router = express.Router();
 
@@ -126,30 +127,30 @@ router.get('/resumes/:id', async (req, res, next) => {
 });
 
 /** 이력서 수정 API **/
-router.put('/resumes/:resumeid', async (req, res, next) => {
+router.put('/resumes/:id', updatedResumeValidator, async (req, res, next) => {
   try {
     const user = req.user;
     const userId = user.id;
-    const resumeId = parseInt(req.params.resumeid);
+    const { id } = req.params;
     const { title, introduction } = req.body;
 
     // 유효성 검사
-    if (!title || !introduction) {
-      return res.status(400).json({ message: '수정 할 정보를 입력해 주세요.' });
-    }
-
-    const resume = await prisma.resumes.findFirst({
-      where: { resumeId, userId },
+    let isExistResume = await prisma.resume.findUnique({
+      where: { id: +id, userId },
+      include: { user: true },
     });
 
-    if (!resume) {
-      return res.status(404).json({ message: '이력서가 존재하지 않습니다.' });
+    if (!isExistResume) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
+      });
     }
 
     //이력서 수정
-    const resumeUpdate = await prisma.resumes.update({
-      where: { resumeId },
-      data: { title, introduction },
+    const data = await prisma.resume.update({
+      where: { id: +id, userId },
+      data: { ...(title && { title }), ...(introduction && { introduction }) },
     });
 
     return res.status(HTTP_STATUS.OK).json({
@@ -163,30 +164,33 @@ router.put('/resumes/:resumeid', async (req, res, next) => {
 });
 
 /** 이력서 삭제 API **/
-router.delete('/resumes/:resumeid', async (req, res, next) => {
+router.delete('/resumes/:id', async (req, res, next) => {
   try {
     const user = req.user;
     const userId = user.id;
-    const resumeId = parseInt(req.params.resumeid);
+    const { id } = req.params;
 
     // 유효성 검사
-    const resume = await prisma.resumes.findFirst({
-      where: { resumeId, userId },
+    let isExistResume = await prisma.resume.findUnique({
+      where: { id: +id, userId },
     });
 
-    if (!resume) {
-      return res.status(404).json({ message: '이력서가 존재하지 않습니다.' });
+    if (!isExistResume) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
+      });
     }
 
-    // 이력서 삭제
-    await prisma.resumes.delete({
-      where: { resumeId },
+    //이력서 삭제
+    const data = await prisma.resume.delete({
+      where: { id: +id, userId },
     });
 
     return res.status(HTTP_STATUS.OK).json({
       status: HTTP_STATUS.OK,
       message: MESSAGES.RESUMES.DELETE.SUCCEED,
-      data,
+      data: { id: data.id },
     });
   } catch (err) {
     next(err);
