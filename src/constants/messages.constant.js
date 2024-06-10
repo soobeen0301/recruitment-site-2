@@ -1,4 +1,5 @@
 import { MIN_PASSWORD_LENGTH } from '../constants/auth.constant.js';
+import { MIN_RESUME_LENGTH } from './resume.constant.js';
 
 export const MESSAGES = {
   USER: {
@@ -33,6 +34,39 @@ export const MESSAGES = {
     },
     SIGN_IN: {
       SUCCEED: '로그인에 성공했습니다.',
+    },
+  },
+  USERS: {
+    READ_ME: {
+      SUCCEED: '내 정보 조회에 성공했습니다.',
+    },
+  },
+  RESUMES: {
+    COMMON: {
+      TITLE: {
+        REQUIRED: '제목을 입력해 주세요.',
+      },
+
+      INTRODUCTION: {
+        REQUIRED: '자기소개를 입력해주세요',
+        MIN_LENGTH: `자기소개는 ${MIN_RESUME_LENGTH}자 이상 작성해야 합니다.`,
+      },
+    },
+
+    CREATE: {
+      SUCCEED: '이력서 생성에 성공했습니다.',
+    },
+    READ_LIST: {
+      SUCCEED: '이력서 목록 조회에 성공했습니다.',
+    },
+    READ_DETAIL: {
+      SUCCEED: '이력서 상세 조회에 성공했습니다.',
+    },
+    UPDATE: {
+      SUCCEED: '이력서 수정에 성공했습니다.',
+    },
+    DELETE: {
+      SUCCEED: '이력서 삭제에 성공했습니다.',
     },
   },
 };

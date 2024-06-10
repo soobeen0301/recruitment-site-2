@@ -1,4 +1,0 @@
-export const USERS_STATUS = {
-  APPLICANT: 'APPLICANT',
-  RECRUITER: 'RECRUITER',
-};

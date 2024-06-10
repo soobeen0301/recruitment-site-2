@@ -11,7 +11,7 @@ export const requireAccessToken = async (req, res, next) => {
 
     // Authorization이 없는 경우
     if (!authorization) {
-      return res.statue(HTTP_STATUS.UNAUTHORIZED).json({
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         status: HTTP_STATUS.UNAUTHORIZED,
         messages: MESSAGES.USER.COMMON.JWT.NO_TOKEN,
       });
@@ -21,7 +21,7 @@ export const requireAccessToken = async (req, res, next) => {
     const [type, accessToken] = authorization.split(' ');
 
     if (type !== 'Bearer') {
-      return res.statue(HTTP_STATUS.UNAUTHORIZED).json({
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         status: HTTP_STATUS.UNAUTHORIZED,
         messages: MESSAGES.USER.COMMON.JWT.NOT_SUPPORTED_TYPE,
       });
@@ -29,7 +29,7 @@ export const requireAccessToken = async (req, res, next) => {
 
     // AccessToken이 없는 경우
     if (!accessToken) {
-      return res.statue(HTTP_STATUS.UNAUTHORIZED).json({
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         status: HTTP_STATUS.UNAUTHORIZED,
         messages: MESSAGES.USER.COMMON.JWT.NO_TOKEN,
       });
@@ -41,14 +41,14 @@ export const requireAccessToken = async (req, res, next) => {
     } catch (error) {
       // AccessToken의 유효기간이 지난 경우
       if (error.name === 'TokenExpiredError') {
-        return res.statue(HTTP_STATUS.UNAUTHORIZED).json({
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
           status: HTTP_STATUS.UNAUTHORIZED,
           messages: MESSAGES.USER.COMMON.JWT.EXPIRED,
         });
       }
       // 그 밖의 AccessToken 검증에 실패한 경우
       else {
-        return res.statue(HTTP_STATUS.UNAUTHORIZED).json({
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
           status: HTTP_STATUS.UNAUTHORIZED,
           messages: MESSAGES.USER.COMMON.JWT.INVALID,
         });
@@ -57,13 +57,13 @@ export const requireAccessToken = async (req, res, next) => {
     // Payload에 담긴 사용자 ID와 일치하는 사용자가 없는 경우
     const { id } = payload;
 
-    const user = prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id },
       omit: { password: true },
     });
 
     if (!user) {
-      return res.statue(HTTP_STATUS.UNAUTHORIZED).json({
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         status: HTTP_STATUS.UNAUTHORIZED,
         messages: MESSAGES.USER.COMMON.JWT.NO_USER,
       });
