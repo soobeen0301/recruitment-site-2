@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
-import { prisma } from '../routers/index.js';
+import { prisma } from '../utils/prisma.util.js';
 import { JWT_SECRET } from '../constants/env.constant.js';
+import { HTTP_STATUS } from '../constants/http-status.constant.js';
 
 export default async function (req, res, next) {
   try {
@@ -22,8 +23,8 @@ export default async function (req, res, next) {
       where: { id: +userId },
     });
     if (!user) {
-      return res.status(401).json({
-        status: 401,
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        status: HTTP_STATUS.UNAUTHORIZED,
         message: '인증 정보와 일치하는 사용자가 없습니다.',
       });
     }
@@ -35,16 +36,18 @@ export default async function (req, res, next) {
     console.error('Authentication error:', error);
     switch (error.name) {
       case 'TokenExpiredError':
-        return res
-          .status(401)
-          .json({ status: 401, message: '인증 정보가 만료되었습니다.' });
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: HTTP_STATUS.UNAUTHORIZED,
+          message: '인증 정보가 만료되었습니다.',
+        });
       case 'JsonWebTokenError':
-        return res
-          .status(401)
-          .json({ status: 401, message: '인증 정보가 유효하지 않습니다.' });
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: HTTP_STATUS.UNAUTHORIZED,
+          message: '인증 정보가 유효하지 않습니다.',
+        });
       default:
-        return res.status(401).json({
-          status: 401,
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: HTTP_STATUS.UNAUTHORIZED,
           message: error.message ?? '비정상적인 요청입니다.',
         });
     }

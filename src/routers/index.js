@@ -1,7 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import express from 'express';
+import userRouter from './users.router.js';
+// import ResumeRouter from './resumes.router.js';
 
-export const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'],
+const apiRouter = express.Router();
 
-  errorFormat: 'pretty',
-});
+apiRouter.use('/auth', [userRouter]);
+// apiRouter.use('/auth', [ResumeRouter]);
+
+export { apiRouter };

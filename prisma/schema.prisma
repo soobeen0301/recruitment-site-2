@@ -13,44 +13,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
-  id        Int       @id @default(autoincrement()) @map("id")
-  email     String    @unique @map("email")
-  password  String    @map("password")
-  createdAt DateTime  @default(now()) @map("createdAt")
-  updatedAt DateTime  @updatedAt @map("updatedAt")
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String   @map("name")
+  role      UserRole @default(APPLICANT) @map("role")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  userInfos UserInfos? // 사용자(Users) 테이블과 사용자 정보(UserInfos) 테이블이 1:1 관계를 맺습니다.
-  resumes   Resumes[]  // 사용자(Users) 테이블과 이력서(Resumes) 테이블이 1:N 관계를 맺습니다.
+  resume Resume[] // 사용자(Users) 테이블과 이력서(Resumes) 테이블이 1:N 관계를 맺습니다.
 
-  @@map("Users")
+  @@map("users")
 }
 
-model Resumes {
-  resumeId     Int      @id @default(autoincrement()) @map("resumeId")
-  userId       Int      @map("userId") // Users 테이블을 참조하는 외래키
-  title        String   @map("title")
-  introduction String   @map("introduction") @db.Text
-  status       String   @default("APPLY") @map("status")
-  createdAt    DateTime @default(now()) @map("createdAt")
-  updatedAt    DateTime @updatedAt @map("updatedAt")
+model Resume {
+  resumeId     Int          @id @default(autoincrement()) @map("resume_id")
+  userId       Int          @map("user_id") // Users 테이블을 참조하는 외래키
+  title        String
+  introduction String       @db.Text
+  status       ResumeStatus @default(APPLY)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
 
   // Users 테이블과 관계를 설정합니다.
-  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("Resumes")
+  @@map("resumes")
 }
 
-model UserInfos {
-  userInfoId   Int      @id @default(autoincrement()) @map("userInfoId")
-  userId       Int      @unique @map("userId") // Users 테이블을 참조하는 외래키
-  name         String   @map("name")
-  role         String   @map("role")
-  createdAt    DateTime @default(now()) @map("createdAt")
-  updatedAt    DateTime @updatedAt @map("updatedAt")
+enum UserRole {
+  APPLICANT
+  RECRUITER
+}
 
-  // Users 테이블과 관계를 설정합니다.
-  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("UserInfos")
+enum ResumeStatus {
+  APPLY
+  DROP
+  PASS
+  INTERVIEW1
+  INTERVIEW2
+  FINAL_PASS
 }
