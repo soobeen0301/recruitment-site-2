@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/prisma.util.js';
-import { JWT_SECRET } from '../constants/env.constant.js';
+import { ACCESS_TOKEN_SECRET } from '../constants/env.constant.js';
 import { HTTP_STATUS } from '../constants/http-status.constant.js';
 
 export default async function (req, res, next) {
@@ -15,7 +15,7 @@ export default async function (req, res, next) {
     if (tokenType !== 'Bearer')
       throw new Error('지원하지 않는 인증 방식입니다.');
 
-    const decodedToken = jwt.verify(token, JWT_SECRET);
+    const decodedToken = jwt.verify(token, ACCESS_TOKEN_SECRET);
     console.log('Decoded token:', decodedToken);
     const userId = decodedToken.userId;
 

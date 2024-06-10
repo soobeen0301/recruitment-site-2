@@ -17,6 +17,16 @@ export const MESSAGES = {
         NOT_MACHTED_WITH_PASSWORD: '입력 한 두 비밀번호가 일치하지 않습니다.',
       },
       NAME: { REQUIRED: '이름을 입력해주세요.' },
+
+      UNAUTHORIZED: '인증 정보가 유효하지 않습니다.',
+
+      JWT: {
+        NO_TOKEN: '인증 정보가 없습니다.',
+        NOT_SUPPORTED_TYPE: '지원하지 않는 인증 방식입니다.',
+        EXPIRED: '인증 정보가 만료되었습니다.',
+        NO_USER: '인증 정보와 일치하는 사용자가 없습니다.',
+        INVALID: '인증 정보가 유효하지 않습니다.',
+      },
     },
     SIGN_UP: {
       SUCCEED: '회원가입 성공했습니다.',

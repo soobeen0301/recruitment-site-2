@@ -1,16 +1,16 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import validator from 'validator';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/prisma.util.js';
-import { JWT_SECRET } from '../constants/env.constant.js';
+import { ACCESS_TOKEN_SECRET } from '../constants/env.constant.js';
 import { USERS_STATUS } from '../constants/user.constant.js';
 import { HTTP_STATUS } from '../constants/http-status.constant.js';
 import { MESSAGES } from '../constants/messages.constant.js';
 import { signUpValidator } from '../middlewares/validators/sign-up-validator.middleware.js';
 import { signInValidator } from '../middlewares/validators/sign-in-validator.middleware.js';
 import { HASH_SALT_ROUDNDS } from '../constants/auth.constant.js';
-import authMiddleware from '../middlewares/auth.middleware.js';
+import { ACCESS_TOKEN_EXPIRES_IN } from '../constants/auth.constant.js';
+import { requireAccessToken } from '../middlewares/require-access-token.middleware.js';
 
 const router = express.Router();
 
@@ -65,27 +65,27 @@ router.post('/sign-in', signInValidator, async (req, res, next) => {
     const isPasswordMatched =
       user && bcrypt.compareSync(password, user.password);
 
-    //if (!user || !(await bcrypt.compare(password, user.password))) {
-    //return res
-    //.status(401)
-    // .json({ message: '인증 정보가 유효하지 않습니다.' });
-    // }
+    if (!isPasswordMatched) {
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        status: HTTP_STATUS.UNAUTHORIZED,
+        message: MESSAGES.USER.COMMON.UNAUTHORIZED,
+      });
+    }
 
     // AccessToken 생성
-    const token = jwt.sign(
-      {
-        userId: user.id,
-      },
-      JWT_SECRET,
+    const payload = { id: user.id };
 
-      { expiresIn: '12h' }
-    );
+    const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
+      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+    });
 
-    res.cookie('authorization', `Bearer ${token}`);
+    //res.cookie('authorization', `Bearer ${accessToken}`);
 
-    return res
-      .status(HTTP_STATUS.OK)
-      .json({ status: HTTP_STATUS.OK, message: MESSAGES.USER.SIGN_IN.SUCCEED });
+    return res.status(HTTP_STATUS.OK).json({
+      status: HTTP_STATUS.OK,
+      message: MESSAGES.USER.SIGN_IN.SUCCEED,
+      data: { accessToken },
+    });
   } catch (err) {
     next(err);
   }
