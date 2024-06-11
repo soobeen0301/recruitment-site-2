@@ -41,6 +41,9 @@ export const MESSAGES = {
         SUCCEED: '토큰 재발급에 성공했습니다.',
       },
     },
+    SIGN_OUT: {
+      SUCCEED: '로그아웃에 성공했습니다.',
+    },
   },
   USERS: {
     READ_ME: {

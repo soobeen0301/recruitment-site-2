@@ -91,6 +91,30 @@ router.post('/sign-in', signInValidator, async (req, res, next) => {
   }
 });
 
+/* 사용자 로그아웃 API */
+router.post('/sign-out', requireRefreshToken, async (req, res, next) => {
+  try {
+    const user = req.user;
+
+    await prisma.refreshToken.update({
+      where: {
+        userId: user.id,
+      },
+      data: {
+        refreshToken: null,
+      },
+    });
+
+    return res.status(HTTP_STATUS.OK).json({
+      status: HTTP_STATUS.OK,
+      message: MESSAGES.USER.SIGN_OUT.SUCCEED,
+      data: { id: user.id },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 /* 토큰 재발급 API */
 router.post('/token', requireRefreshToken, async (req, res, next) => {
   try {
