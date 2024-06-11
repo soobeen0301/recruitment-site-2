@@ -48,7 +48,7 @@ model Resume {
 model ResumeLog {
   id          Int          @id @default(autoincrement())
   recruiterId Int          @map("recruiter_id") // Users 테이블을 참조하는 외래키
-  resumeId    Int          @map("resume_id")
+  resumeId    Int          @map("resume_id") //resumes 테이블을 참조하는 외래키
   oldStatus   ResumeStatus @map("old_status")
   newStatus   ResumeStatus @map("new_status")
   reason      String
