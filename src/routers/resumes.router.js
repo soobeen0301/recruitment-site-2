@@ -4,6 +4,8 @@ import { HTTP_STATUS } from '../constants/http-status.constant.js';
 import { MESSAGES } from '../constants/messages.constant.js';
 import { createResumeValidator } from '../middlewares/validators/create-resume-validator.middleware.js';
 import { updatedResumeValidator } from '../middlewares/validators/updated-resume-validator.middleware.js';
+import { USER_ROLE } from '../constants/user.constant.js';
+import { UserRole } from '@prisma/client';
 
 const router = express.Router();
 
@@ -48,9 +50,23 @@ router.get('/resumes', async (req, res, next) => {
       sort = 'desc';
     }
 
+    const whereCondition = {};
+    // 채용 담당자인 경우
+    if (user.role === USER_ROLE.RECRUITER) {
+      const { status } = req.query;
+
+      if (status) {
+        whereCondition.status = status;
+      }
+    }
+    // 지원자인 경우
+    else {
+      whereCondition.userId = +userId;
+    }
+
     //이력서 목록 조회
     let data = await prisma.resume.findMany({
-      where: { userId },
+      where: whereCondition,
       orderBy: { createdAt: sort },
       include: {
         user: true,
@@ -88,9 +104,14 @@ router.get('/resumes/:id', async (req, res, next) => {
 
     const { id } = req.params;
 
+    const whereCondition = { id: +id };
+    if (user.role !== UserRole.RECRUITER) {
+      whereCondition.userId = +userId;
+    }
+
     //이력서 조회
     let data = await prisma.resume.findUnique({
-      where: { id: +id, userId },
+      where: whereCondition,
       include: { user: true },
     });
 
