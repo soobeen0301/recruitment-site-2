@@ -2,13 +2,20 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/prisma.util.js';
-import { ACCESS_TOKEN_SECRET } from '../constants/env.constant.js';
+import {
+  ACCESS_TOKEN_SECRET,
+  REFRESH_TOKEN_SECRET,
+} from '../constants/env.constant.js';
 import { HTTP_STATUS } from '../constants/http-status.constant.js';
 import { MESSAGES } from '../constants/messages.constant.js';
 import { signUpValidator } from '../middlewares/validators/sign-up-validator.middleware.js';
 import { signInValidator } from '../middlewares/validators/sign-in-validator.middleware.js';
-import { HASH_SALT_ROUDNDS } from '../constants/auth.constant.js';
-import { ACCESS_TOKEN_EXPIRES_IN } from '../constants/auth.constant.js';
+import {
+  HASH_SALT_ROUDNDS,
+  ACCESS_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_EXPIRES_IN,
+} from '../constants/auth.constant.js';
+import { requireRefreshToken } from '../middlewares/require-refresh-token.middleware.js';
 
 const router = express.Router();
 
@@ -70,23 +77,69 @@ router.post('/sign-in', signInValidator, async (req, res, next) => {
       });
     }
 
-    // AccessToken 생성
     const payload = { id: user.id };
 
-    const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
-    });
-
-    //res.cookie('authorization', `Bearer ${accessToken}`);
+    const data = await generateAuthTokens(payload);
 
     return res.status(HTTP_STATUS.OK).json({
       status: HTTP_STATUS.OK,
       message: MESSAGES.USER.SIGN_IN.SUCCEED,
-      data: { accessToken },
+      data,
     });
   } catch (err) {
     next(err);
   }
 });
+
+/* 토큰 재발급 API */
+router.post('/token', requireRefreshToken, async (req, res, next) => {
+  try {
+    const user = req.user;
+
+    const payload = { id: user.id };
+
+    const data = await generateAuthTokens(payload);
+
+    return res.status(HTTP_STATUS.OK).json({
+      status: HTTP_STATUS.OK,
+      message: MESSAGES.USER.SIGN_IN.TOKEN.SUCCEED,
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+const generateAuthTokens = async (payload) => {
+  const userId = payload.id;
+
+  const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+  });
+
+  // RefreshToken 생성
+  const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+  });
+
+  // RefreshToken 저장
+  const hashedRefreshToken = bcrypt.hashSync(refreshToken, HASH_SALT_ROUDNDS);
+
+  // RefreshToken 생성 또는 갱신
+  await prisma.refreshToken.upsert({
+    where: {
+      userId,
+    },
+    update: {
+      refreshToken: hashedRefreshToken,
+    },
+    create: {
+      userId,
+      refreshToken: hashedRefreshToken,
+    },
+  });
+
+  return { accessToken, refreshToken };
+};
 
 export default router;

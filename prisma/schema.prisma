@@ -23,8 +23,9 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  resume     Resume[] // 사용자(Users) 테이블과 이력서(Resumes) 테이블이 1:N 관계를 맺습니다.
-  resumeLogs ResumeLog[]
+  resume       Resume[] // 사용자(Users) 테이블과 이력서(Resumes) 테이블이 1:N 관계를 맺습니다.
+  resumeLogs   ResumeLog[]
+  refreshToken refreshToken?
 
   @@map("users")
 }
@@ -60,6 +61,19 @@ model ResumeLog {
   resume    Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
   @@map("resume_logs")
+}
+
+model refreshToken {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique @map("user_id")
+  refreshToken String   @map("refresh_token")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Users 테이블과 관계를 설정합니다.
+  refresh User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
 }
 
 enum UserRole {
