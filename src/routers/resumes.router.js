@@ -3,9 +3,10 @@ import { prisma } from '../utils/prisma.util.js';
 import { HTTP_STATUS } from '../constants/http-status.constant.js';
 import { MESSAGES } from '../constants/messages.constant.js';
 import { createResumeValidator } from '../middlewares/validators/create-resume-validator.middleware.js';
-import { updatedResumeValidator } from '../middlewares/validators/updated-resume-validator.middleware.js';
+import { updatedResumeValidator } from '../middlewares/validators/update-resume-validator.middleware.js';
 import { USER_ROLE } from '../constants/user.constant.js';
-import { UserRole } from '@prisma/client';
+import { requireRoles } from '../middlewares/require-roles.middleware.js';
+import { updatedResumeStatusValidator } from '../middlewares/validators/update-resume-status-validator.middleware.js';
 
 const router = express.Router();
 
@@ -105,7 +106,7 @@ router.get('/resumes/:id', async (req, res, next) => {
     const { id } = req.params;
 
     const whereCondition = { id: +id };
-    if (user.role !== UserRole.RECRUITER) {
+    if (user.role !== USER_ROLE.RECRUITER) {
       whereCondition.userId = +userId;
     }
 
@@ -156,7 +157,7 @@ router.put('/resumes/:id', updatedResumeValidator, async (req, res, next) => {
     const { title, introduction } = req.body;
 
     // 유효성 검사
-    let isExistResume = await prisma.resume.findUnique({
+    const isExistResume = await prisma.resume.findUnique({
       where: { id: +id, userId },
       include: { user: true },
     });
@@ -192,7 +193,7 @@ router.delete('/resumes/:id', async (req, res, next) => {
     const { id } = req.params;
 
     // 유효성 검사
-    let isExistResume = await prisma.resume.findUnique({
+    const isExistResume = await prisma.resume.findUnique({
       where: { id: +id, userId },
     });
 
@@ -217,5 +218,63 @@ router.delete('/resumes/:id', async (req, res, next) => {
     next(err);
   }
 });
+
+/* 이력서 지원 상태 변경 API */
+router.patch(
+  '/resumes/:id/status',
+  requireRoles([USER_ROLE.RECRUITER]),
+  updatedResumeStatusValidator,
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const recruiterId = user.id;
+      const { id } = req.params;
+      const { status, reason } = req.body;
+
+      //트랜잭션
+      await prisma.$transaction(async (tx) => {
+        //이력서 정보 조회
+        const isExistResume = await prisma.resume.findUnique({
+          where: { id: +id },
+        });
+
+        //이력서 정보가 없는 경우
+        if (!isExistResume) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            status: HTTP_STATUS.NOT_FOUND,
+            message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
+          });
+        }
+
+        //이력서 정보 수정
+        const updatedResume = await tx.resume.update({
+          where: { id: +id },
+          data: { status },
+        });
+
+        //test code : throw new Error('일부러 만든 에러입니다.');
+
+        //이력서 로그 생성
+        const data = await tx.resumeLog.create({
+          data: {
+            recruiterId,
+            resumeId: isExistResume.id,
+            oldStatus: isExistResume.status,
+            newStatus: updatedResume.status,
+            reason,
+          },
+        });
+
+        return res.status(HTTP_STATUS.OK).json({
+          status: HTTP_STATUS.OK,
+          messages: MESSAGES.RESUMES.UPDATE.STATUS.SUCCEED,
+          data,
+        });
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 export default router;

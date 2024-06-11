@@ -23,7 +23,8 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  resume Resume[] // 사용자(Users) 테이블과 이력서(Resumes) 테이블이 1:N 관계를 맺습니다.
+  resume     Resume[] // 사용자(Users) 테이블과 이력서(Resumes) 테이블이 1:N 관계를 맺습니다.
+  resumeLogs ResumeLog[]
 
   @@map("users")
 }
@@ -38,9 +39,27 @@ model Resume {
   updatedAt    DateTime     @updatedAt @map("updated_at")
 
   // Users 테이블과 관계를 설정합니다.
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeLogs ResumeLog[]
 
   @@map("resumes")
+}
+
+model ResumeLog {
+  id          Int          @id @default(autoincrement())
+  recruiterId Int          @map("recruiter_id") // Users 테이블을 참조하는 외래키
+  resumeId    Int          @map("resume_id")
+  oldStatus   ResumeStatus @map("old_status")
+  newStatus   ResumeStatus @map("new_status")
+  reason      String
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  // Users 테이블과 관계를 설정합니다.
+  recruiter User   @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  //Resume 테이블과 관계를 설정합니다.
+  resume    Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@map("resume_logs")
 }
 
 enum UserRole {
