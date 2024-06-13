@@ -4,7 +4,7 @@ import { ResumesService } from '../services/resumes.service.js';
 export class ResumesController {
   resumesService = new ResumesService();
 
-  /* 게시물 생성 API */
+  /* 이력서 생성 API */
   createPost = async (req, res, next) => {
     try {
       const user = req.user;
@@ -26,7 +26,7 @@ export class ResumesController {
     }
   };
 
-  /* 게시글 목록 조회 API */
+  /* 이력서 목록 조회 API */
   findPosts = async (req, res, next) => {
     try {
       const user = req.user;
@@ -55,14 +55,14 @@ export class ResumesController {
     }
   };
 
-  /* 게시글 상세 조회 API */
+  /* 이력서 상세 조회 API */
   findPost = async (req, res, next) => {
     try {
       const user = req.user;
 
       const { id } = req.params;
 
-      const post = await this.resumesService.findPost(id, user);
+      const post = await this.resumesService.findPost(user, id);
 
       const data = {
         id: post.id,
@@ -78,6 +78,48 @@ export class ResumesController {
         status: HTTP_STATUS.OK,
         message: MESSAGES.RESUMES.READ_DETAIL.SUCCEED,
         data,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /* 이력서 수정 API */
+  updateResume = async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      const { title, introduction } = req.body;
+
+      const post = await this.resumesService.updateResume(
+        user,
+        id,
+        title,
+        introduction
+      );
+
+      return res.status(HTTP_STATUS.OK).json({
+        status: HTTP_STATUS.OK,
+        message: MESSAGES.RESUMES.UPDATE.SUCCEED,
+        data: post,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /* 이력서 삭제 API */
+  deleteResume = async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+
+      const post = await this.resumesService.deleteResume(user, id);
+
+      return res.status(HTTP_STATUS.OK).json({
+        status: HTTP_STATUS.OK,
+        message: MESSAGES.RESUMES.DELETE.SUCCEED,
+        data: { id: post.id },
       });
     } catch (err) {
       next(err);

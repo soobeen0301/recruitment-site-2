@@ -22,75 +22,14 @@ router.get('/resumes', resumesController.findPosts);
 router.get('/resumes/:id', resumesController.findPost);
 
 /** 이력서 수정 API **/
-router.put('/resumes/:id', updatedResumeValidator, async (req, res, next) => {
-  try {
-    const user = req.user;
-    const userId = user.id;
-    const { id } = req.params;
-    const { title, introduction } = req.body;
-
-    // 유효성 검사
-    const isExistResume = await prisma.resume.findUnique({
-      where: { id: +id, userId },
-      include: { user: true },
-    });
-
-    if (!isExistResume) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        status: HTTP_STATUS.NOT_FOUND,
-        message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
-      });
-    }
-
-    //이력서 수정
-    const data = await prisma.resume.update({
-      where: { id: +id, userId },
-      data: { ...(title && { title }), ...(introduction && { introduction }) },
-    });
-
-    return res.status(HTTP_STATUS.OK).json({
-      status: HTTP_STATUS.OK,
-      message: MESSAGES.RESUMES.UPDATE.SUCCEED,
-      data,
-    });
-  } catch (err) {
-    next(err);
-  }
-});
+router.put(
+  '/resumes/:id',
+  updatedResumeValidator,
+  resumesController.updateResume
+);
 
 /** 이력서 삭제 API **/
-router.delete('/resumes/:id', async (req, res, next) => {
-  try {
-    const user = req.user;
-    const userId = user.id;
-    const { id } = req.params;
-
-    // 유효성 검사
-    const isExistResume = await prisma.resume.findUnique({
-      where: { id: +id, userId },
-    });
-
-    if (!isExistResume) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        status: HTTP_STATUS.NOT_FOUND,
-        message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
-      });
-    }
-
-    //이력서 삭제
-    const data = await prisma.resume.delete({
-      where: { id: +id, userId },
-    });
-
-    return res.status(HTTP_STATUS.OK).json({
-      status: HTTP_STATUS.OK,
-      message: MESSAGES.RESUMES.DELETE.SUCCEED,
-      data: { id: data.id },
-    });
-  } catch (err) {
-    next(err);
-  }
-});
+router.delete('/resumes/:id', resumesController.deleteResume);
 
 /* 이력서 지원 상태 변경 API */
 router.patch(

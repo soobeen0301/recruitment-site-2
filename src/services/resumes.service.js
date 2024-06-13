@@ -13,7 +13,7 @@ export class ResumesService {
     return post;
   };
 
-  /* 게시글 목록 조회 API */
+  /* 이력서 목록 조회 API */
   findPosts = async (user, sort, status) => {
     //정렬
     sort = sort?.toLowerCase();
@@ -45,8 +45,8 @@ export class ResumesService {
     return data;
   };
 
-  /* 게시글 상세 조회 API */
-  findPost = async (id, user) => {
+  /* 이력서 상세 조회 API */
+  findPost = async (user, id) => {
     const whereCondition = { id: +id };
 
     if (user.role !== USER_ROLE.RECRUITER) {
@@ -66,6 +66,52 @@ export class ResumesService {
         message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
       };
     }
+    return data;
+  };
+
+  /* 이력서 수정 API */
+  updateResume = async (user, id, title, introduction) => {
+    const isExistResume = await prisma.resume.findUnique({
+      where: { id: +id },
+      include: { user: true },
+    });
+
+    if (!isExistResume || isExistResume.userId !== user.id) {
+      throw {
+        status: HTTP_STATUS.NOT_FOUND,
+        message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
+      };
+    }
+
+    //이력서 수정
+    const data = await prisma.resume.update({
+      where: { id: +id },
+      data: {
+        ...(title && { title }),
+        ...(introduction && { introduction }),
+      },
+    });
+    return data;
+  };
+
+  /* 이력서 삭제 API */
+  deleteResume = async (user, id) => {
+    // 유효성 검사
+    const isExistResume = await prisma.resume.findUnique({
+      where: { id: +id },
+    });
+
+    if (!isExistResume || isExistResume.userId !== user.id) {
+      throw {
+        status: HTTP_STATUS.NOT_FOUND,
+        message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
+      };
+    }
+
+    //이력서 삭제
+    const data = await prisma.resume.delete({
+      where: { id: +id },
+    });
     return data;
   };
 }
