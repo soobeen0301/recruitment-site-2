@@ -114,4 +114,41 @@ export class ResumesService {
     });
     return data;
   };
+
+  /* 이력서 지원 상태 변경 API */
+  updateResumeStatus = async (user, id, status, reason) => {
+    //트랜잭션
+    return await prisma.$transaction(async (tx) => {
+      //이력서 정보 조회
+      const isExistResume = await prisma.resume.findUnique({
+        where: { id: +id },
+      });
+
+      //이력서 정보가 없는 경우
+      if (!isExistResume) {
+        throw {
+          status: HTTP_STATUS.NOT_FOUND,
+          message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
+        };
+      }
+
+      //이력서 정보 수정
+      const updatedResume = await tx.resume.update({
+        where: { id: +id },
+        data: { status },
+      });
+
+      //이력서 로그 생성
+      const data = await tx.resumeLog.create({
+        data: {
+          recruiterId: user.id,
+          resumeId: isExistResume.id,
+          oldStatus: isExistResume.status,
+          newStatus: updatedResume.status,
+          reason,
+        },
+      });
+      return data;
+    });
+  };
 }

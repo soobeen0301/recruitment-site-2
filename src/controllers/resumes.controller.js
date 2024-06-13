@@ -125,4 +125,28 @@ export class ResumesController {
       next(err);
     }
   };
+
+  /* 이력서 지원 상태 변경 API */
+  updateResumeStatus = async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      const { status, reason } = req.body;
+
+      const updatedStatus = await this.resumesService.updateResumeStatus(
+        user,
+        id,
+        status,
+        reason
+      );
+
+      return res.status(HTTP_STATUS.OK).json({
+        status: HTTP_STATUS.OK,
+        messages: MESSAGES.RESUMES.UPDATE.STATUS.SUCCEED,
+        data: updatedStatus,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 }
