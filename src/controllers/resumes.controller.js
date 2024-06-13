@@ -149,4 +149,21 @@ export class ResumesController {
       next(err);
     }
   };
+
+  /* 이력서 로그 목록 조회 API */
+  findPostsLog = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const log = await this.resumesService.findPostsLog(id);
+
+      return res.status(HTTP_STATUS.OK).json({
+        status: HTTP_STATUS.OK,
+        messages: MESSAGES.RESUMES.READ_LIST.LOG.SUCCEED,
+        data: log,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 }

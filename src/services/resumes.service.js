@@ -151,4 +151,26 @@ export class ResumesService {
       return data;
     });
   };
+
+  /* 이력서 로그 목록 조회 API */
+  findPostsLog = async (id) => {
+    let data = await prisma.resumeLog.findMany({
+      where: { resumeId: +id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        recruiter: true,
+      },
+    });
+
+    data = data.map((log) => ({
+      id: log.id,
+      recruiterName: log.recruiter.name,
+      resumeId: log.resumeId,
+      oldStatus: log.oldStatus,
+      newStatus: log.newStatus,
+      reason: log.reason,
+      createdAt: log.createdAt,
+    }));
+    return data;
+  };
 }

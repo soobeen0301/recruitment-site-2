@@ -1,7 +1,4 @@
 import express from 'express';
-import { prisma } from '../utils/prisma.util.js';
-import { HTTP_STATUS } from '../constants/http-status.constant.js';
-import { MESSAGES } from '../constants/messages.constant.js';
 import { USER_ROLE } from '../constants/user.constant.js';
 import { createResumeValidator } from '../middlewares/validators/create-resume-validator.middleware.js';
 import { updatedResumeValidator } from '../middlewares/validators/update-resume-validator.middleware.js';
@@ -43,39 +40,7 @@ router.patch(
 router.get(
   '/resumes/:id/logs',
   requireRoles([USER_ROLE.RECRUITER]),
-  async (req, res, next) => {
-    try {
-      const { id } = req.params;
-
-      let data = await prisma.resumeLog.findMany({
-        where: { resumeId: +id },
-        orderBy: { createdAt: 'desc' },
-        include: {
-          recruiter: true,
-        },
-      });
-
-      data = data.map((log) => {
-        return {
-          id: log.id,
-          recruiterName: log.recruiter.name,
-          resumeId: log.resumeId,
-          oldStatus: log.oldStatus,
-          newStatus: log.newStatus,
-          reason: log.reason,
-          createdAt: log.createdAt,
-        };
-      });
-
-      return res.status(HTTP_STATUS.OK).json({
-        status: HTTP_STATUS.OK,
-        messages: MESSAGES.RESUMES.READ_LIST.LOG.SUCCEED,
-        data,
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
+  resumesController.findPostsLog
 );
 
 export default router;
