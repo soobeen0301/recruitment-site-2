@@ -54,4 +54,33 @@ export class ResumesController {
       next(err);
     }
   };
+
+  /* 게시글 상세 조회 API */
+  findPost = async (req, res, next) => {
+    try {
+      const user = req.user;
+
+      const { id } = req.params;
+
+      const post = await this.resumesService.findPost(id, user);
+
+      const data = {
+        id: post.id,
+        userName: post.user.name,
+        title: post.title,
+        introduction: post.introduction,
+        status: post.status,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+      };
+
+      return res.status(HTTP_STATUS.OK).json({
+        status: HTTP_STATUS.OK,
+        message: MESSAGES.RESUMES.READ_DETAIL.SUCCEED,
+        data,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 }

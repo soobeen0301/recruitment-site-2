@@ -44,4 +44,28 @@ export class ResumesService {
     });
     return data;
   };
+
+  /* 게시글 상세 조회 API */
+  findPost = async (id, user) => {
+    const whereCondition = { id: +id };
+
+    if (user.role !== USER_ROLE.RECRUITER) {
+      whereCondition.userId = +user.id;
+    }
+
+    //이력서 조회
+    const data = await prisma.resume.findUnique({
+      where: whereCondition,
+      include: { user: true },
+    });
+
+    //이력서가 없다면 오류
+    if (!data) {
+      throw {
+        status: HTTP_STATUS.NOT_FOUND,
+        message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
+      };
+    }
+    return data;
+  };
 }

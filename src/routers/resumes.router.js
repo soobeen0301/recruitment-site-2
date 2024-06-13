@@ -19,55 +19,7 @@ router.post('/resumes', createResumeValidator, resumesController.createPost);
 router.get('/resumes', resumesController.findPosts);
 
 /** 이력서 상세 조회 API **/
-router.get('/resumes/:id', async (req, res, next) => {
-  try {
-    const user = req.user;
-    const userId = user.id;
-
-    const { id } = req.params;
-
-    const whereCondition = { id: +id };
-    if (user.role !== USER_ROLE.RECRUITER) {
-      whereCondition.userId = +userId;
-    }
-
-    //이력서 조회
-    let data = await prisma.resume.findUnique({
-      where: whereCondition,
-      include: { user: true },
-    });
-
-    //이력서가 없다면 오류
-    if (!data) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        status: HTTP_STATUS.NOT_FOUND,
-        message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
-      });
-    }
-
-    data = {
-      id: data.id,
-      userName: data.user.name,
-      title: data.title,
-      introduction: data.introduction,
-      status: data.status,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-    };
-
-    //data.userName = data.user.name;
-    // data.userId = undefined;
-    //data.user = undefined;
-
-    return res.status(HTTP_STATUS.OK).json({
-      status: HTTP_STATUS.OK,
-      message: MESSAGES.RESUMES.READ_DETAIL.SUCCEED,
-      data,
-    });
-  } catch (err) {
-    next(err);
-  }
-});
+router.get('/resumes/:id', resumesController.findPost);
 
 /** 이력서 수정 API **/
 router.put('/resumes/:id', updatedResumeValidator, async (req, res, next) => {
