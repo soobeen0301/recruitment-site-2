@@ -1,5 +1,7 @@
 import { prisma } from '../utils/prisma.util.js';
 import { USER_ROLE } from '../constants/user.constant.js';
+import { MESSAGES } from '../constants/messages.constant.js';
+import { HttpError } from '../errors/http.error.js';
 export class ResumesService {
   /* 이력서 생성 API */
   createPost = async (userId, title, introduction) => {
@@ -61,10 +63,7 @@ export class ResumesService {
 
     //이력서가 없다면 오류
     if (!data) {
-      throw {
-        status: HTTP_STATUS.NOT_FOUND,
-        message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
-      };
+      throw new HttpError.NotFound(MESSAGES.RESUMES.COMMON.NOT_FOUND);
     }
     return data;
   };
@@ -77,10 +76,7 @@ export class ResumesService {
     });
 
     if (!isExistResume || isExistResume.userId !== user.id) {
-      throw {
-        status: HTTP_STATUS.NOT_FOUND,
-        message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
-      };
+      throw new HttpError.NotFound(MESSAGES.RESUMES.COMMON.NOT_FOUND);
     }
 
     //이력서 수정
@@ -102,10 +98,7 @@ export class ResumesService {
     });
 
     if (!isExistResume || isExistResume.userId !== user.id) {
-      throw {
-        status: HTTP_STATUS.NOT_FOUND,
-        message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
-      };
+      throw new HttpError.NotFound(MESSAGES.RESUMES.COMMON.NOT_FOUND);
     }
 
     //이력서 삭제
@@ -126,10 +119,7 @@ export class ResumesService {
 
       //이력서 정보가 없는 경우
       if (!isExistResume) {
-        throw {
-          status: HTTP_STATUS.NOT_FOUND,
-          message: MESSAGES.RESUMES.COMMON.NOT_FOUND,
-        };
+        throw new HttpError.NotFound(MESSAGES.RESUMES.COMMON.NOT_FOUND);
       }
 
       //이력서 정보 수정
@@ -161,6 +151,10 @@ export class ResumesService {
         recruiter: true,
       },
     });
+
+    if (!data || data.length === 0) {
+      throw new HttpError.NotFound(MESSAGES.RESUMES.COMMON.NOT_FOUND);
+    }
 
     data = data.map((log) => ({
       id: log.id,

@@ -1,7 +1,6 @@
 import { prisma } from '../utils/prisma.util.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { HTTP_STATUS } from '../constants/http-status.constant.js';
 import { MESSAGES } from '../constants/messages.constant.js';
 import {
   ACCESS_TOKEN_SECRET,
@@ -12,6 +11,7 @@ import {
   ACCESS_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_EXPIRES_IN,
 } from '../constants/auth.constant.js';
+import { HttpError } from '../errors/http.error.js';
 
 export class AuthService {
   /* 회원가입 API */
@@ -20,10 +20,7 @@ export class AuthService {
     const isExistUser = await prisma.user.findFirst({ where: { email } });
 
     if (isExistUser) {
-      throw {
-        status: HTTP_STATUS.CONFLICT,
-        message: MESSAGES.USER.COMMON.EMAIL.DUPLICATED,
-      };
+      throw new HttpError.Conflict(MESSAGES.USER.COMMON.EMAIL.DUPLICATED);
     }
 
     // 비밀번호 해시화하기
@@ -46,6 +43,7 @@ export class AuthService {
         updatedAt: true,
       },
     });
+    return user;
   };
 
   /* 로그인 API */
@@ -57,10 +55,7 @@ export class AuthService {
       user && bcrypt.compareSync(password, user.password);
 
     if (!isPasswordMatched) {
-      throw {
-        status: HTTP_STATUS.UNAUTHORIZED,
-        message: MESSAGES.USER.COMMON.UNAUTHORIZED,
-      };
+      throw new HttpError.Unauthorized(MESSAGES.USER.COMMON.UNAUTHORIZED);
     }
 
     const payload = { id: user.id };
