@@ -188,4 +188,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+.idea
+
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,windows,node,dotenv
