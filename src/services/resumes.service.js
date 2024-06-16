@@ -80,7 +80,7 @@ export class ResumesService {
 
   /* 이력서 지원 상태 변경 API */
   updateStatus = async (user, id, status, reason) => {
-    const whereCondition = { id: +id, userId: user.id };
+    const whereCondition = { id: +id };
 
     const isExistResume = await this.resumesRepository.readOne(whereCondition);
 
@@ -101,27 +101,12 @@ export class ResumesService {
 
   /* 이력서 로그 목록 조회 API */
   readLog = async (id) => {
-    let data = await prisma.resumeLog.findMany({
-      where: { resumeId: +id },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        recruiter: true,
-      },
-    });
+    const data = await this.resumesRepository.readLog(id);
 
     if (!data || data.length === 0) {
       throw new HttpError.NotFound(MESSAGES.RESUMES.COMMON.NOT_FOUND);
     }
 
-    data = data.map((log) => ({
-      id: log.id,
-      recruiterName: log.recruiter.name,
-      resumeId: log.resumeId,
-      oldStatus: log.oldStatus,
-      newStatus: log.newStatus,
-      reason: log.reason,
-      createdAt: log.createdAt,
-    }));
     return data;
   };
 }
