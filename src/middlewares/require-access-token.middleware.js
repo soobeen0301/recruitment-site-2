@@ -59,7 +59,7 @@ export const requireAccessToken = async (req, res, next) => {
     // Payload에 담긴 사용자 ID와 일치하는 사용자가 없는 경우
     const { id } = payload;
 
-    const user = await usersRepository.findUserId(id);
+    const user = await usersRepository.readOneById(id);
 
     if (!user) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({

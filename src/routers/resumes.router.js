@@ -10,37 +10,33 @@ const router = express.Router();
 const resumesController = new ResumesController();
 
 /** 이력서 생성 API **/
-router.post('/resumes', createResumeValidator, resumesController.createPost);
+router.post('/resumes', createResumeValidator, resumesController.create);
 
 /** 이력서 목록 조회 API **/
-router.get('/resumes', resumesController.findPosts);
+router.get('/resumes', resumesController.readMany);
 
 /** 이력서 상세 조회 API **/
-router.get('/resumes/:id', resumesController.findPost);
+router.get('/resumes/:id', resumesController.readOne);
 
 /** 이력서 수정 API **/
-router.put(
-  '/resumes/:id',
-  updatedResumeValidator,
-  resumesController.updateResume
-);
+router.put('/resumes/:id', updatedResumeValidator, resumesController.update);
 
 /** 이력서 삭제 API **/
-router.delete('/resumes/:id', resumesController.deleteResume);
+router.delete('/resumes/:id', resumesController.delete);
 
 /* 이력서 지원 상태 변경 API */
 router.patch(
   '/resumes/:id/status',
   requireRoles([USER_ROLE.RECRUITER]),
   updatedResumeStatusValidator,
-  resumesController.updateResumeStatus
+  resumesController.updateStatus
 );
 
 /* 이력서 로그 목록 조회 API */
 router.get(
   '/resumes/:id/logs',
   requireRoles([USER_ROLE.RECRUITER]),
-  resumesController.findPostsLog
+  resumesController.readLog
 );
 
 export default router;

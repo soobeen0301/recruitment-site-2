@@ -5,12 +5,12 @@ export class ResumesController {
   resumesService = new ResumesService();
 
   /* 이력서 생성 API */
-  createPost = async (req, res, next) => {
+  create = async (req, res, next) => {
     try {
       const user = req.user;
       const { title, introduction } = req.body;
 
-      const createdPost = await this.resumesService.createPost(
+      const data = await this.resumesService.create(
         user.id,
         title,
         introduction
@@ -19,7 +19,7 @@ export class ResumesController {
       return res.status(HTTP_STATUS.CREATED).json({
         status: HTTP_STATUS.CREATED,
         message: MESSAGES.RESUMES.CREATE.SUCCEED,
-        data: createdPost,
+        data,
       });
     } catch (err) {
       next(err);
@@ -27,28 +27,17 @@ export class ResumesController {
   };
 
   /* 이력서 목록 조회 API */
-  findPosts = async (req, res, next) => {
+  readMany = async (req, res, next) => {
     try {
       const user = req.user;
       const { sort, status } = req.query;
 
-      const data = await this.resumesService.findPosts(user, sort, status);
-
-      //이력서 조회 시 출력될 내용
-      const posts = data.map((resume) => ({
-        id: resume.id,
-        userName: resume.user.name,
-        title: resume.title,
-        introduction: resume.introduction,
-        status: resume.status,
-        createdAt: resume.createdAt,
-        updatedAt: resume.updatedAt,
-      }));
+      const data = await this.resumesService.readMany(user, sort, status);
 
       return res.status(HTTP_STATUS.OK).json({
         status: HTTP_STATUS.OK,
         message: MESSAGES.RESUMES.READ_LIST.SUCCEED,
-        data: posts,
+        data,
       });
     } catch (err) {
       next(err);
@@ -56,23 +45,13 @@ export class ResumesController {
   };
 
   /* 이력서 상세 조회 API */
-  findPost = async (req, res, next) => {
+  readOne = async (req, res, next) => {
     try {
       const user = req.user;
 
       const { id } = req.params;
 
-      const post = await this.resumesService.findPost(user, id);
-
-      const data = {
-        id: post.id,
-        userName: post.user.name,
-        title: post.title,
-        introduction: post.introduction,
-        status: post.status,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-      };
+      const data = await this.resumesService.readOne(user, id);
 
       return res.status(HTTP_STATUS.OK).json({
         status: HTTP_STATUS.OK,
@@ -85,13 +64,13 @@ export class ResumesController {
   };
 
   /* 이력서 수정 API */
-  updateResume = async (req, res, next) => {
+  update = async (req, res, next) => {
     try {
       const user = req.user;
       const { id } = req.params;
       const { title, introduction } = req.body;
 
-      const post = await this.resumesService.updateResume(
+      const data = await this.resumesService.update(
         user,
         id,
         title,
@@ -101,7 +80,7 @@ export class ResumesController {
       return res.status(HTTP_STATUS.OK).json({
         status: HTTP_STATUS.OK,
         message: MESSAGES.RESUMES.UPDATE.SUCCEED,
-        data: post,
+        data,
       });
     } catch (err) {
       next(err);
@@ -109,17 +88,17 @@ export class ResumesController {
   };
 
   /* 이력서 삭제 API */
-  deleteResume = async (req, res, next) => {
+  delete = async (req, res, next) => {
     try {
       const user = req.user;
       const { id } = req.params;
 
-      const post = await this.resumesService.deleteResume(user, id);
+      const data = await this.resumesService.delete(user, id);
 
       return res.status(HTTP_STATUS.OK).json({
         status: HTTP_STATUS.OK,
         message: MESSAGES.RESUMES.DELETE.SUCCEED,
-        data: { id: post.id },
+        data,
       });
     } catch (err) {
       next(err);
@@ -127,13 +106,13 @@ export class ResumesController {
   };
 
   /* 이력서 지원 상태 변경 API */
-  updateResumeStatus = async (req, res, next) => {
+  updateStatus = async (req, res, next) => {
     try {
       const user = req.user;
       const { id } = req.params;
       const { status, reason } = req.body;
 
-      const updatedStatus = await this.resumesService.updateResumeStatus(
+      const updatedStatus = await this.resumesService.updateStatus(
         user,
         id,
         status,
@@ -151,11 +130,11 @@ export class ResumesController {
   };
 
   /* 이력서 로그 목록 조회 API */
-  findPostsLog = async (req, res, next) => {
+  readLog = async (req, res, next) => {
     try {
       const { id } = req.params;
 
-      const log = await this.resumesService.findPostsLog(id);
+      const log = await this.resumesService.readLog(id);
 
       return res.status(HTTP_STATUS.OK).json({
         status: HTTP_STATUS.OK,

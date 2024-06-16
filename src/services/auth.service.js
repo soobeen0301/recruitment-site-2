@@ -12,44 +12,28 @@ import {
   REFRESH_TOKEN_EXPIRES_IN,
 } from '../constants/auth.constant.js';
 import { HttpError } from '../errors/http.error.js';
+import { UsersRepository } from '../repositories/users.repository.js';
 
 export class AuthService {
+  usersRepository = new UsersRepository();
+
   /* 회원가입 API */
-  createAuth = async (email, password, name) => {
+  signUp = async (email, password, name) => {
     // 유효성 검사 (이메일이 중복된 경우)
-    const isExistUser = await prisma.user.findFirst({ where: { email } });
+    const isExistUser = await this.usersRepository.readOneByEmail(email);
 
     if (isExistUser) {
       throw new HttpError.Conflict(MESSAGES.USER.COMMON.EMAIL.DUPLICATED);
     }
+    const data = await this.usersRepository.create(email, password, name);
 
-    // 비밀번호 해시화하기
-    const hashedPassword = bcrypt.hashSync(password, HASH_SALT_ROUDNDS);
-
-    // User 테이블에 사용자 추가
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name,
-        role: 'APPLICANT',
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-    return user;
+    return data;
   };
 
   /* 로그인 API */
-  signInUser = async (email, password) => {
+  signIn = async (email, password) => {
     // 유효성 검사
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await this.usersRepository.readOneByEmail(email);
 
     const isPasswordMatched =
       user && bcrypt.compareSync(password, user.password);
@@ -66,7 +50,7 @@ export class AuthService {
   };
 
   /* 로그아웃 API */
-  signOutUser = async (userId) => {
+  signOut = async (userId) => {
     await prisma.refreshToken.update({
       where: { userId },
       data: { refreshToken: null },

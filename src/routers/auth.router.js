@@ -8,13 +8,13 @@ const router = express.Router();
 const authController = new AuthController();
 
 /** 사용자 회원가입 API **/
-router.post('/sign-up', signUpValidator, authController.createAuth);
+router.post('/sign-up', signUpValidator, authController.signUp);
 
 /* 사용자 로그인 API */
-router.post('/sign-in', signInValidator, authController.signInUser);
+router.post('/sign-in', signInValidator, authController.signIn);
 
 /* 사용자 로그아웃 API */
-router.post('/sign-out', requireRefreshToken, authController.signOutUser);
+router.post('/sign-out', requireRefreshToken, authController.signOut);
 
 /* 토큰 재발급 API */
 router.post('/token', requireRefreshToken, authController.refreshToken);

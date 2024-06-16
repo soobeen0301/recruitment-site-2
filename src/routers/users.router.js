@@ -6,6 +6,6 @@ const router = express.Router();
 const usersController = new UsersController();
 
 /* 사용자 정보 조회 API */
-router.get('/users', requireAccessToken, usersController.getUser);
+router.get('/users', requireAccessToken, usersController.readUser);
 
 export default router;
