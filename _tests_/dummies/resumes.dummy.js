@@ -17,7 +17,7 @@ export const dummyResumes = [
     status: 'APPLY',
     createdAt: new Date(),
     updatedAt: new Date(),
-    author: dummyUsers[1],
+    user: dummyUsers[1],
   },
   {
     id: 2,
@@ -28,7 +28,7 @@ export const dummyResumes = [
     status: 'PASS',
     createdAt: new Date(new Date().getTime() + 1000),
     updatedAt: new Date(new Date().getTime() + 1000),
-    author: dummyUsers[1],
+    user: dummyUsers[1],
   },
   {
     id: 3,
@@ -39,7 +39,7 @@ export const dummyResumes = [
     status: 'APPLY',
     createdAt: new Date(new Date().getTime() + 2000),
     updatedAt: new Date(new Date().getTime() + 2000),
-    author: dummyUsers[2],
+    user: dummyUsers[2],
   },
   {
     id: 4,
@@ -50,6 +50,6 @@ export const dummyResumes = [
     status: 'INTERVIEW1',
     createdAt: new Date(new Date().getTime() + 3000),
     updatedAt: new Date(new Date().getTime() + 3000),
-    author: dummyUsers[2],
+    user: dummyUsers[2],
   },
 ];
