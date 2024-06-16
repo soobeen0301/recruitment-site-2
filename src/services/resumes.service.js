@@ -32,10 +32,7 @@ export class ResumesService {
     }
 
     //이력서 조회
-    let data = await this.resumesRepository.readOne({
-      whereCondition,
-      includeUser: true,
-    });
+    let data = await this.resumesRepository.readOne(whereCondition, true);
 
     //이력서가 없다면 오류
     if (!data) {
@@ -49,9 +46,7 @@ export class ResumesService {
   update = async (user, id, title, introduction) => {
     const whereCondition = { id: +id, userId: user.id };
 
-    const isExistResume = await this.resumesRepository.readOne({
-      whereCondition,
-    });
+    const isExistResume = await this.resumesRepository.readOne(whereCondition);
 
     if (!isExistResume) {
       throw new HttpError.NotFound(MESSAGES.RESUMES.COMMON.NOT_FOUND);
@@ -71,9 +66,7 @@ export class ResumesService {
   delete = async (user, id) => {
     const whereCondition = { id: +id, userId: user.id };
 
-    const isExistResume = await this.resumesRepository.readOne({
-      whereCondition,
-    });
+    const isExistResume = await this.resumesRepository.readOne(whereCondition);
 
     if (!isExistResume) {
       throw new HttpError.NotFound(MESSAGES.RESUMES.COMMON.NOT_FOUND);
@@ -89,9 +82,7 @@ export class ResumesService {
   updateStatus = async (user, id, status, reason) => {
     const whereCondition = { id: +id, userId: user.id };
 
-    const isExistResume = await this.resumesRepository.readOne({
-      whereCondition,
-    });
+    const isExistResume = await this.resumesRepository.readOne(whereCondition);
 
     if (!isExistResume) {
       throw new HttpError.NotFound(MESSAGES.RESUMES.COMMON.NOT_FOUND);

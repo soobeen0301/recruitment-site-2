@@ -1,4 +1,5 @@
 import { prisma } from '../utils/prisma.util.js';
+import { USER_ROLE } from '../constants/user.constant.js';
 
 export class ResumesRepository {
   /* 이력서 생성 API */
@@ -60,21 +61,26 @@ export class ResumesRepository {
   /* 이력서 상세 조회 API */
   readOne = async (whereCondition, includeUser = false) => {
     //이력서 조회
-    const data = await prisma.resume.findUnique({
+    let data = await prisma.resume.findUnique({
       where: whereCondition,
       include: { user: includeUser },
     });
 
-    data = {
-      id: data.id,
-      userName: data.user.name,
-      title: data.title,
-      introduction: data.introduction,
-      status: data.status,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-    };
+    if (!data) {
+      return null;
+    }
 
+    if (includeUser) {
+      data = {
+        id: data.id,
+        userName: data.user.name,
+        title: data.title,
+        introduction: data.introduction,
+        status: data.status,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      };
+    }
     return data;
   };
 
