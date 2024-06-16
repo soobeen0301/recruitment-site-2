@@ -1,4 +1,3 @@
-import { prisma } from '../utils/prisma.util.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { MESSAGES } from '../constants/messages.constant.js';
@@ -7,15 +6,15 @@ import {
   REFRESH_TOKEN_SECRET,
 } from '../constants/env.constant.js';
 import {
-  HASH_SALT_ROUDNDS,
   ACCESS_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_EXPIRES_IN,
 } from '../constants/auth.constant.js';
 import { HttpError } from '../errors/http.error.js';
-import { UsersRepository } from '../repositories/users.repository.js';
-
 export class AuthService {
-  usersRepository = new UsersRepository();
+  constructor(usersRepository) {
+    this.usersRepository = usersRepository;
+    this.generateAuthTokens = this.generateAuthTokens.bind(this);
+  }
 
   /* 회원가입 API */
   signUp = async (email, password, name) => {
@@ -44,57 +43,42 @@ export class AuthService {
 
     const payload = { id: user.id };
 
-    const tokens = await generateAuthTokens(payload);
+    const tokens = await this.generateAuthTokens(payload);
 
     return tokens;
   };
 
   /* 로그아웃 API */
   signOut = async (userId) => {
-    await prisma.refreshToken.update({
-      where: { userId },
-      data: { refreshToken: null },
-    });
+    const data = await this.usersRepository.signOut(userId);
+
+    return data;
   };
 
   /* 토큰 재발급 API */
   refreshToken = async (userId) => {
     const payload = { id: userId };
 
-    const tokens = await generateAuthTokens(payload);
+    const tokens = await this.generateAuthTokens(payload);
 
     return tokens;
   };
+
+  generateAuthTokens = async (payload) => {
+    const userId = payload.id;
+
+    const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
+      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+    });
+
+    // RefreshToken 생성
+    const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
+      expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+    });
+
+    // RefreshToken 저장
+    await this.usersRepository.updateRefreshToken(userId, refreshToken);
+
+    return { accessToken, refreshToken };
+  };
 }
-
-const generateAuthTokens = async (payload) => {
-  const userId = payload.id;
-
-  const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
-  });
-
-  // RefreshToken 생성
-  const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
-    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
-  });
-
-  // RefreshToken 저장
-  const hashedRefreshToken = bcrypt.hashSync(refreshToken, HASH_SALT_ROUDNDS);
-
-  // RefreshToken 생성 또는 갱신
-  await prisma.refreshToken.upsert({
-    where: {
-      userId,
-    },
-    update: {
-      refreshToken: hashedRefreshToken,
-    },
-    create: {
-      userId,
-      refreshToken: hashedRefreshToken,
-    },
-  });
-
-  return { accessToken, refreshToken };
-};

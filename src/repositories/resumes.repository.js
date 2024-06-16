@@ -1,10 +1,12 @@
-import { prisma } from '../utils/prisma.util.js';
 import { USER_ROLE } from '../constants/user.constant.js';
 
 export class ResumesRepository {
+  constructor(prisma) {
+    this.prisma = prisma;
+  }
   /* 이력서 생성 API */
   create = async (userId, title, introduction) => {
-    const data = await prisma.resume.create({
+    const data = await this.prisma.resume.create({
       data: {
         userId,
         title,
@@ -36,7 +38,7 @@ export class ResumesRepository {
     }
 
     //이력서 목록 조회
-    let data = await prisma.resume.findMany({
+    let data = await this.prisma.resume.findMany({
       where: whereCondition,
       orderBy: { createdAt: sort },
       include: {
@@ -61,7 +63,7 @@ export class ResumesRepository {
   /* 이력서 상세 조회 API */
   readOne = async (whereCondition, includeUser = false) => {
     //이력서 조회
-    let data = await prisma.resume.findUnique({
+    let data = await this.prisma.resume.findUnique({
       where: whereCondition,
       include: { user: includeUser },
     });
@@ -87,7 +89,7 @@ export class ResumesRepository {
   /* 이력서 수정 API */
   update = async (id, userId, title, introduction) => {
     //이력서 수정
-    const data = await prisma.resume.update({
+    const data = await this.prisma.resume.update({
       where: { id: +id, userId: +userId },
       data: {
         ...(title && { title }),
@@ -100,7 +102,7 @@ export class ResumesRepository {
   /* 이력서 삭제 API */
   delete = async (userId, id) => {
     //이력서 삭제
-    const data = await prisma.resume.delete({
+    const data = await this.prisma.resume.delete({
       where: { id: +id, userId: +userId },
     });
 
@@ -110,7 +112,7 @@ export class ResumesRepository {
   /* 이력서 지원 상태 변경 API */
   updateStatus = async (user, id, isExistResume, status, reason) => {
     //트랜잭션
-    return await prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx) => {
       //이력서 정보 수정
       const updatedResume = await tx.resume.update({
         where: { id: +id },
@@ -133,7 +135,7 @@ export class ResumesRepository {
 
   /* 이력서 로그 목록 조회 API */
   readLog = async (id) => {
-    let data = await prisma.resumeLog.findMany({
+    let data = await this.prisma.resumeLog.findMany({
       where: { resumeId: +id },
       orderBy: { createdAt: 'desc' },
       include: {
