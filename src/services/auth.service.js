@@ -12,10 +12,11 @@ import {
   REFRESH_TOKEN_EXPIRES_IN,
 } from '../constants/auth.constant.js';
 import { HttpError } from '../errors/http.error.js';
-import { UsersRepository } from '../repositories/users.repository.js';
 
 export class AuthService {
-  usersRepository = new UsersRepository();
+  constructor(usersRepository) {
+    this.usersRepository = usersRepository;
+  }
 
   /* 회원가입 API */
   signUp = async (email, password, name) => {

@@ -1,8 +1,9 @@
-import { AuthService } from '../services/auth.service.js';
 import { HTTP_STATUS } from '../constants/http-status.constant.js';
 import { MESSAGES } from '../constants/messages.constant.js';
 export class AuthController {
-  authService = new AuthService();
+  constructor(authService) {
+    this.authService = authService;
+  }
 
   /* 회원가입 API */
   signUp = async (req, res, next) => {

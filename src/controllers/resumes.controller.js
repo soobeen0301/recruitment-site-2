@@ -1,8 +1,9 @@
 import { HTTP_STATUS } from '../constants/http-status.constant.js';
 import { MESSAGES } from '../constants/messages.constant.js';
-import { ResumesService } from '../services/resumes.service.js';
 export class ResumesController {
-  resumesService = new ResumesService();
+  constructor(resumesService) {
+    this.resumesService = resumesService;
+  }
 
   /* 이력서 생성 API */
   create = async (req, res, next) => {
