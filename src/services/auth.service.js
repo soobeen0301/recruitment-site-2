@@ -13,7 +13,6 @@ import { HttpError } from '../errors/http.error.js';
 export class AuthService {
   constructor(usersRepository) {
     this.usersRepository = usersRepository;
-    this.generateAuthTokens = this.generateAuthTokens.bind(this);
   }
 
   /* 회원가입 API */

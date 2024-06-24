@@ -1,5 +1,7 @@
 import { jest, describe, test, expect, beforeEach } from '@jest/globals';
 import { ResumesService } from '../../../src/services/resumes.service.js';
+import { dummyResumes } from '../../dummies/resumes.dummy.js';
+import { RESUME_STATUS } from '../../../src/constants/resume.constant.js';
 
 const mockResumesRepository = {
   create: jest.fn(),
@@ -18,8 +20,33 @@ describe('ResumesService Unit Test', () => {
 
   test('create Method', async () => {
     // GIVEN
+    const { userId, title, introduction } = dummyResumes[0];
+    const mockReturn = {
+      id: 100,
+      userId,
+      title,
+      introduction,
+      status: RESUME_STATUS.APPLY,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    mockResumesRepository.create.mockReturnValue(mockReturn);
     // WHEN
+    const actualResult = await resumesService.create(
+      userId,
+      title,
+      introduction
+    );
     // THEN
+    const expectedResult = mockReturn;
+
+    expect(mockResumesRepository.create).toHaveBeenCalledTimes(1);
+    expect(mockResumesRepository.create).toHaveBeenCalledWith(
+      userId,
+      title,
+      introduction
+    );
+    expect(actualResult).toEqual(expectedResult);
   });
 
   test('readMany Method', async () => {

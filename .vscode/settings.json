@@ -1,0 +1,36 @@
+{
+        "editor.tabSize": 2,
+        "editor.fontSize": 13,
+        "editor.renderWhitespace": "boundary",
+        "editor.cursorStyle": "line",
+        "editor.columnSelection": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": true
+          },
+        "editor.comments.ignoreEmptyLines": true,
+        "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+        "editor.guides.bracketPairs": true,
+        "editor.cursorBlinking": "smooth",
+        "editor.cursorSmoothCaretAnimation": "on",
+        "files.autoSave": "off",
+        "files.exclude": {
+            "**/.classpath": true,
+            "**/.history": true,
+            "**/.project": true,
+            "**/.settings": true
+        },
+        "workbench.editor.enablePreview": false,
+        "workbench.iconTheme": "material-icon-theme",
+        "workbench.sideBar.location": "left",
+        "workbench.tree.expandMode": "doubleClick",
+        "workbench.editor.highlightModifiedTabs": true,
+        "workbench.editor.labelFormat": "short",
+        "workbench.editor.scrollToSwitchTabs": false,
+        "workbench.colorTheme": "One Dark Pro Darker",
+        "scm.diffDecorationsGutterPattern": {
+            "added": true
+        },
+        "terminal.integrated.copyOnSelection": true,
+        "terminal.integrated.cursorBlinking": true,
+        "terminal.integrated.fontSize": 13,
+}
