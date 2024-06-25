@@ -17,6 +17,8 @@ REFRESH_TOKEN_SECRET=JWT 생성을 위한 비밀키
 
 2. 코드 Layer를 분리하여 유지보수성 및 코드 재사용성 향상 시키기
 
+3. Unit test 코드를 작성하여 유지보수성 향상
+
 ## 프로젝트 내용
 
 1. 회원 가입 기능을 통해 유저를 생성할 수 있다.
@@ -75,6 +77,10 @@ REFRESH_TOKEN_SECRET=JWT 생성을 위한 비밀키
 
 - 서버 실행(개발용)
   `yarn dev`
+
+- 서버 테스트
+  `yarn test`
+
 
 # API 명세서
 

@@ -1,5 +1,3 @@
-import { USER_ROLE } from '../constants/user.constant.js';
-
 export class ResumesRepository {
   constructor(prisma) {
     this.prisma = prisma;
@@ -17,26 +15,7 @@ export class ResumesRepository {
   };
 
   /* 이력서 목록 조회 API */
-  readMany = async (user, sort, status) => {
-    //정렬
-    sort = sort?.toLowerCase();
-    if (sort !== 'desc' && sort !== 'asc') {
-      sort = 'desc';
-    }
-
-    const whereCondition = {};
-
-    // 채용 담당자인 경우
-    if (user.role === USER_ROLE.RECRUITER) {
-      if (status) {
-        whereCondition.status = status;
-      }
-    }
-    // 지원자인 경우
-    else {
-      whereCondition.userId = +user.id;
-    }
-
+  readMany = async (whereCondition, sort) => {
     //이력서 목록 조회
     let data = await this.prisma.resume.findMany({
       where: whereCondition,
@@ -134,10 +113,10 @@ export class ResumesRepository {
   };
 
   /* 이력서 로그 목록 조회 API */
-  readLog = async (id) => {
+  readLog = async (id, sortOrder = 'desc') => {
     let data = await this.prisma.resumeLog.findMany({
       where: { resumeId: +id },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: sortOrder },
       include: {
         recruiter: true,
       },
