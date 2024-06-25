@@ -1,13 +1,8 @@
-import { AuthService } from '../services/auth.service.js';
 import { HTTP_STATUS } from '../constants/http-status.constant.js';
 import { MESSAGES } from '../constants/messages.constant.js';
-import { PrismaClient } from '@prisma/client';
-import { UsersRepository } from '../repositories/users.repository.js';
 export class AuthController {
-  constructor() {
-    const prisma = new PrismaClient();
-    const usersRepository = new UsersRepository(prisma);
-    this.authService = new AuthService(usersRepository);
+  constructor(authService) {
+    this.authService = authService;
   }
 
   /* 회원가입 API */

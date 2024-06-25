@@ -1,10 +1,10 @@
-import { prisma } from '../utils/prisma.util.js';
 import { USER_ROLE } from '../constants/user.constant.js';
 import { MESSAGES } from '../constants/messages.constant.js';
 import { HttpError } from '../errors/http.error.js';
-import { ResumesRepository } from '../repositories/resumes.repository.js';
 export class ResumesService {
-  resumesRepository = new ResumesRepository();
+  constructor(resumesRepository) {
+    this.resumesRepository = resumesRepository;
+  }
 
   /* 이력서 생성 API */
   create = async (userId, title, introduction) => {
@@ -44,7 +44,8 @@ export class ResumesService {
 
   /* 이력서 수정 API */
   update = async (user, id, title, introduction) => {
-    const whereCondition = { id: +id, userId: user.id };
+    id = Number(id);
+    const whereCondition = { id, userId: user.id };
 
     const isExistResume = await this.resumesRepository.readOne(whereCondition);
 
