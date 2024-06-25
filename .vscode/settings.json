@@ -5,8 +5,8 @@
         "editor.cursorStyle": "line",
         "editor.columnSelection": false,
         "editor.codeActionsOnSave": {
-            "source.fixAll.eslint": true
-          },
+            "source.fixAll.eslint": "explicit"
+        },
         "editor.comments.ignoreEmptyLines": true,
         "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
         "editor.guides.bracketPairs": true,

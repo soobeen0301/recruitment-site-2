@@ -44,7 +44,8 @@ export class ResumesService {
 
   /* 이력서 수정 API */
   update = async (user, id, title, introduction) => {
-    const whereCondition = { id: +id, userId: user.id };
+    id = Number(id);
+    const whereCondition = { id, userId: user.id };
 
     const isExistResume = await this.resumesRepository.readOne(whereCondition);
 
