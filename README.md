@@ -84,7 +84,7 @@ REFRESH_TOKEN_SECRET=JWT 생성을 위한 비밀키
 
 # API 명세서
 
-https://www.notion.so/Node-js-API-e98b987233234ae8b05b09f3298fd12e
+[https://www.notion.so/Node-js-API-e98b987233234ae8b05b09f3298fd12e](https://melted-gram-487.notion.site/Node-js-API-aa954cc9fafe4d5cacfc837abb76279c?pvs=4)
 
 # ERD
 
